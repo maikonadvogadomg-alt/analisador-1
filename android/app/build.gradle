@@ -15,6 +15,7 @@ android {
         versionName "${cfg.versao ?: '1.0'}"
         resValue "string", "app_name", "${cfg.nome}"
         resValue "color", "tema", "${cfg.cor ?: '#0f1420'}"
+        resValue "bool", "lacre", "${cfg.lacre ? 'true' : 'false'}"
         manifestPlaceholders = [orientacao: (cfg.orientacao ?: 'unspecified')]
     }
 

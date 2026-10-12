@@ -1,14 +1,27 @@
-// service-worker.js — gerado pelo Mini SK em 12/10/2026, 15:06:52
+// service-worker.js — gerado pelo Mini SK em 12/10/2026, 17:50:33
 // Não precisa mexer: ele guarda sozinho o que o app usa.
-const PREFIXO = 'sk-analisador-1-';
-const CACHE = PREFIXO + 'mv5kdfal';
+const PREFIXO = 'sk-analisador1-';
+const CACHE = PREFIXO + 'mv5q7xr4';
 // Lista feita automaticamente (para funcionar sem internet logo após instalar)
 const GUARDAR = [
   "./",
+  "./android/app/build.gradle",
+  "./android/app/src/main/AndroidManifest.xml",
+  "./android/app/src/main/assets/__ponte.js",
+  "./android/app/src/main/java/app/minisk/shell/MainActivity.java",
+  "./android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+  "./android/app/src/main/res/xml/rede.xml",
+  "./android/build.gradle",
+  "./android/gradle.properties",
+  "./android/release.keystore",
+  "./android/settings.gradle",
+  "./apk.config.json",
   "./css/base.css",
   "./css/components.css",
   "./css/layout.css",
   "./css/tabs.css",
+  "./electron/main.cjs",
+  "./electron/preload.cjs",
   "./favicon.ico",
   "./hub.html",
   "./hub.webmanifest",
@@ -38,7 +51,9 @@ const GUARDAR = [
   "./js/report.js",
   "./js/state.js",
   "./js/viewer.js",
-  "./manifest.json"
+  "./manifest.json",
+  "./package.json",
+  "./PLANO.md"
 ];
 
 self.addEventListener('install', (e) => {

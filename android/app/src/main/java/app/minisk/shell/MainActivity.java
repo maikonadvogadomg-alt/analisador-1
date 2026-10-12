@@ -22,7 +22,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.webkit.ServiceWorkerClientCompat;
+import androidx.webkit.ServiceWorkerControllerCompat;
 import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewFeature;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -56,12 +59,29 @@ public class MainActivity extends Activity {
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
                 .build();
 
+        // O service worker do app (sw.js) também precisa achar os arquivos que vão DENTRO
+        // do APK. Sem isto, da 2ª vez que abre ele tenta buscar na internet um endereço
+        // que não existe e a página/prévia fica em branco.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.SERVICE_WORKER_BASIC_USAGE)) {
+            ServiceWorkerControllerCompat.getInstance().setServiceWorkerClient(new ServiceWorkerClientCompat() {
+                @Override
+                public WebResourceResponse shouldInterceptRequest(WebResourceRequest req) {
+                    WebResourceResponse r = carregador.shouldInterceptRequest(req.getUrl());
+                    String c = req.getUrl().getPath();
+                    if (r != null && c != null && (c.toLowerCase().endsWith(".html") || c.toLowerCase().endsWith(".htm"))) r = comPonte(r);
+                    return comLacre(r);
+                }
+            });
+        }
+
         web = new WebView(this);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
+        // 📱 Termux: a página (https interno) precisa poder abrir ws://127.0.0.1
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(true);
 
@@ -70,8 +90,8 @@ public class MainActivity extends Activity {
             public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest req) {
                 WebResourceResponse r = carregador.shouldInterceptRequest(req.getUrl());
                 String c = req.getUrl().getPath();
-                if (r != null && c != null && (c.toLowerCase().endsWith(".html") || c.toLowerCase().endsWith(".htm"))) return comPonte(r);
-                return r;
+                if (r != null && c != null && (c.toLowerCase().endsWith(".html") || c.toLowerCase().endsWith(".htm"))) r = comPonte(r);
+                return comLacre(r);
             }
 
             @Override
@@ -160,6 +180,21 @@ public class MainActivity extends Activity {
             if (ok) pedidoPendente.grant(pedidoPendente.getResources()); else pedidoPendente.deny();
             pedidoPendente = null;
         }
+    }
+
+    /** 🔒 Lacre (COOP/COEP): o que o sw.js fazia no navegador. Liga o "terminal real" (WebContainer). */
+    private WebResourceResponse comLacre(WebResourceResponse r) {
+        if (r == null) return null;
+        boolean ligado = false;
+        try { ligado = getResources().getBoolean(R.bool.lacre); } catch (Exception ignorado) { }
+        if (!ligado) return r;
+        java.util.Map<String, String> h = new java.util.HashMap<>();
+        if (r.getResponseHeaders() != null) h.putAll(r.getResponseHeaders());
+        h.put("Cross-Origin-Opener-Policy", "same-origin");
+        h.put("Cross-Origin-Embedder-Policy", "credentialless");
+        h.put("Cross-Origin-Resource-Policy", "cross-origin");
+        r.setResponseHeaders(h);
+        return r;
     }
 
     /** Coloca a ponte (assets/__ponte.js) no começo de cada página: faz "baixar" e "imprimir" funcionarem em qualquer HTML. */
