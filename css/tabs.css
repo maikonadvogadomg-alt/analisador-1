@@ -1,0 +1,87 @@
+/* ============================================================
+   TABS — sistema de abas de navegação
+   ============================================================ */
+
+/* BARRA DE ABAS */
+.tab-nav {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: 8px 8px 0;
+  flex-wrap: wrap;
+  overflow-x: auto;
+}
+
+/* BOTÃO DE ABA */
+.tab-btn {
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  position: relative;
+  bottom: -1px;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+  background: var(--bg-main);
+  border-color: var(--border);
+  border-bottom-color: var(--bg-main);
+  font-weight: 600;
+}
+
+/* ÁREA DE CONTEÚDO */
+.tab-content {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: 20px;
+  min-height: 420px;
+}
+
+/* PAINÉIS */
+.tab-panel {
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVO */
+@media (max-width: 640px) {
+  .tab-nav {
+    padding: 6px 6px 0;
+    gap: 1px;
+  }
+
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .tab-content {
+    padding: 14px;
+  }
+}

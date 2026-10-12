@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📋 Documentador de Projeto</title>
+
+  <!-- CSS MODULAR -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/tabs.css">
+  <!-- PWA:inicio (gerado pelo Mini SK — pode refazer no painel 📱 PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1f6feb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="📋 Documentador de Projeto">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <script>
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      addEventListener('load', function () { navigator.serviceWorker.register('service-worker.js').catch(function (e) { console.warn('Service worker:', e); }); });
+    }
+  </script>
+  <!-- PWA:fim -->
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header class="app-header">
+    <div class="header-icon">📋</div>
+    <div class="header-text">
+      <h1>Documentador de Projeto</h1>
+      <p>Importe um ZIP ou HTML — gera documentação e plano de melhorias</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="abrirHistorico()">
+        🗂️ Histórico
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="app-main">
+
+    <!-- ZONA DE IMPORTAÇÃO -->
+    <section class="drop-zone" id="dropZone"
+      ondragover="dragOver(event)"
+      ondragleave="dragLeave(event)"
+      ondrop="onDrop(event)">
+      <div class="drop-icon">📦</div>
+      <h2>Arraste seu projeto aqui</h2>
+      <p>Suporta arquivos <strong>.zip</strong> ou <strong>.html</strong></p>
+      <button class="btn btn-primary"
+        onclick="document.getElementById('fileInput').click()">
+        📁 Escolher Arquivo
+      </button>
+      <input type="file" id="fileInput"
+        accept=".zip,.html,.htm"
+        onchange="onFileSelect(this.files[0])">
+    </section>
+
+    <!-- BARRA DE LOADING -->
+    <section class="loading-bar" id="loadingBar" style="display:none">
+      <div class="spinner"></div>
+      <span id="loadingMsg">Analisando projeto...</span>
+    </section>
+
+    <!-- PAINEL DE RESULTADO -->
+    <section class="result-panel" id="resultPanel" style="display:none">
+
+      <div class="project-badge" id="projectBadge"></div>
+
+      <nav class="tab-nav" id="tabNav">
+        <button class="tab-btn active" data-tab="visao">🏠 Visão Geral</button>
+        <button class="tab-btn" data-tab="plano">🗺️ Plano</button>
+        <button class="tab-btn" data-tab="arquivos">📁 Arquivos</button>
+        <button class="tab-btn" data-tab="arvore">🌳 Árvore</button>
+        <button class="tab-btn" data-tab="codigo">👁️ Código</button>
+        <button class="tab-btn" data-tab="problemas">⚠️ Problemas</button>
+        <button class="tab-btn" data-tab="relatorio">🤖 Relatório IA</button>
+      </nav>
+
+      <div class="tab-content">
+
+        <div class="tab-panel active" id="tab-visao">
+          <div class="stats-grid" id="statsGrid"></div>
+          <div class="two-col">
+            <div class="card">
+              <div class="card-title">🔧 Tecnologias</div>
+              <div id="techBadges"></div>
+            </div>
+            <div class="card">
+              <div class="card-title">📦 Dependências</div>
+              <div id="depsList"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🌐 APIs Utilizadas</div>
+            <div id="apiList"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">💡 Resumo Automático</div>
+            <div id="resumoTexto" class="resumo-text"></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-plano">
+          <div id="planoConteudo"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-arquivos">
+          <input class="search-input" id="fileSearch"
+            placeholder="🔍 Buscar arquivo por nome ou tipo..."
+            oninput="filtrarArquivos()">
+          <ul class="file-list" id="fileList"></ul>
+        </div>
+
+        <div class="tab-panel" id="tab-arvore">
+          <div class="tree-view" id="treeView"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-codigo">
+          <div id="viewerContent">
+            <div class="viewer-empty">
+              Clique em um arquivo na aba
+              <strong>📁 Arquivos</strong> ou
+              <strong>🌳 Árvore</strong> para ver o código
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-problemas">
+          <div id="problemsList"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-relatorio">
+          <div class="report-actions">
+            <button class="btn btn-primary" onclick="copiarRelatorio()">📋 Copiar Relatório</button>
+            <button class="btn btn-success" onclick="copiarPlano()">🗺️ Copiar Plano</button>
+            <button class="btn btn-warn"    onclick="salvarNoHistorico()">💾 Salvar Histórico</button>
+          </div>
+          <div class="report-box" id="reportBox"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODAL HISTÓRICO -->
+    <div class="modal-overlay" id="modalHistorico"
+      style="display:none" onclick="fecharHistorico(event)">
+      <div class="modal">
+        <div class="modal-header">
+          <span>🗂️ Projetos Analisados</span>
+          <button class="btn btn-ghost" onclick="fecharHistorico()">✕</button>
+        </div>
+        <div class="modal-body" id="historicoLista"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ✅ LIBS VIA CDN — não precisa baixar nada -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
+
+  <!-- JS MODULAR -->
+  <script src="js/state.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/loader.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/builder.js"></script>
+  <script src="js/viewer.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
